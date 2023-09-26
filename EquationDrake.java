@@ -1,7 +1,9 @@
 package tp2;
+
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
+import java.util.Random;
 
 public class EquationDrake {
     private JFrame frame;
@@ -10,7 +12,8 @@ public class EquationDrake {
 
     private JLabel labelTitle, labelFormula, labelR, labelFp, labelNe, labelFl, labelFi, labelFc, labelL, labelResult;
     private JSlider sliderR, sliderFp, sliderNe, sliderFl, sliderFi, sliderFc, sliderL;
-    private JTextField resultFieldR, resultFieldFp, resultFieldNe, resultFieldFl, resultFieldFi, resultFieldFc, resultFieldL, resultField;
+    private JTextField textFieldR, textFieldFp, textFieldNe, textFieldFl, textFieldFi, textFieldFc, textFieldL,
+            resultField;
 
     public EquationDrake() {
         frame = new JFrame("Équation de Drake");
@@ -20,36 +23,37 @@ public class EquationDrake {
 
         labelTitle = new JLabel("Équation de Drake");
         labelTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        labelFormula = new JLabel("<html>N = R* * fp * ne * fl * fi * fc * L<br>(N = Nombre de civilisations extraterrestres dans notre galaxie)</html>");
+        labelFormula = new JLabel(
+                "<html>N = R* * fp * ne * fl * fi * fc * L<br>(N = Nombre de civilisations extraterrestres dans notre galaxie)</html>");
         labelFormula.setFont(new Font("SansSerif", Font.PLAIN, 16));
 
         labelR = new JLabel("Taux de formation d'étoiles (R*)");
         sliderR = createSlider(100, 10000, 2000); // Plage de 0 à 100 avec valeur initiale à 20
-        resultFieldR = createResultField(20);
+        textFieldR = createResultField(20);
 
         labelFp = new JLabel("Fraction d'étoiles avec des systèmes planétaires (fp)");
         sliderFp = createSlider(0, 100, 10); // Plage de 0 à 100 avec valeur initiale à 10
-        resultFieldFp = createResultField(10);
+        textFieldFp = createResultField(10);
 
         labelNe = new JLabel("Nombre moyen de planètes potentiellement habitables (ne)");
         sliderNe = createSlider(0, 100, 50); // Plage de 0 à 100 avec valeur initiale à 50
-        resultFieldNe = createResultField(50);
+        textFieldNe = createResultField(50);
 
         labelFl = new JLabel("Fraction de planètes où la vie se développe (fl)");
         sliderFl = createSlider(0, 100, 50); // Plage de 0 à 100 avec valeur initiale à 50
-        resultFieldFl = createResultField(50);
+        textFieldFl = createResultField(50);
 
         labelFi = new JLabel("Fraction de planètes avec une vie intelligente (fi)");
         sliderFi = createSlider(0, 100, 50); // Plage de 0 à 100 avec valeur initiale à 50
-        resultFieldFi = createResultField(50);
+        textFieldFi = createResultField(50);
 
         labelFc = new JLabel("Fraction de planètes avec une civilisation technologique (fc)");
         sliderFc = createSlider(0, 100, 10); // Plage de 0 à 100 avec valeur initiale à 10
-        resultFieldFc = createResultField(10);
+        textFieldFc = createResultField(10);
 
         labelL = new JLabel("Durée de communication (L)");
         sliderL = createSlider(100, 100000, 100000); // Plage de 0 à 1 000 000 avec valeur initiale à 100 000
-        resultFieldL = createResultField(100000);
+        textFieldL = createResultField(100000);
 
         labelResult = new JLabel("Résultat de l'équation :");
         resultField = createResultField(0);
@@ -94,7 +98,7 @@ public class EquationDrake {
         constraints.gridx = 1;
         panel.add(sliderR, constraints);
         constraints.gridx = 2;
-        panel.add(resultFieldR, constraints);
+        panel.add(textFieldR, constraints);
 
         constraints.gridy++;
         constraints.gridx = 0;
@@ -102,7 +106,7 @@ public class EquationDrake {
         constraints.gridx = 1;
         panel.add(sliderFp, constraints);
         constraints.gridx = 2;
-        panel.add(resultFieldFp, constraints);
+        panel.add(textFieldFp, constraints);
 
         constraints.gridy++;
         constraints.gridx = 0;
@@ -110,7 +114,7 @@ public class EquationDrake {
         constraints.gridx = 1;
         panel.add(sliderNe, constraints);
         constraints.gridx = 2;
-        panel.add(resultFieldNe, constraints);
+        panel.add(textFieldNe, constraints);
 
         constraints.gridy++;
         constraints.gridx = 0;
@@ -118,7 +122,7 @@ public class EquationDrake {
         constraints.gridx = 1;
         panel.add(sliderFl, constraints);
         constraints.gridx = 2;
-        panel.add(resultFieldFl, constraints);
+        panel.add(textFieldFl, constraints);
 
         constraints.gridy++;
         constraints.gridx = 0;
@@ -126,7 +130,7 @@ public class EquationDrake {
         constraints.gridx = 1;
         panel.add(sliderFi, constraints);
         constraints.gridx = 2;
-        panel.add(resultFieldFi, constraints);
+        panel.add(textFieldFi, constraints);
 
         constraints.gridy++;
         constraints.gridx = 0;
@@ -134,7 +138,7 @@ public class EquationDrake {
         constraints.gridx = 1;
         panel.add(sliderFc, constraints);
         constraints.gridx = 2;
-        panel.add(resultFieldFc, constraints);
+        panel.add(textFieldFc, constraints);
 
         constraints.gridy++;
         constraints.gridx = 0;
@@ -142,7 +146,7 @@ public class EquationDrake {
         constraints.gridx = 1;
         panel.add(sliderL, constraints);
         constraints.gridx = 2;
-        panel.add(resultFieldL, constraints);
+        panel.add(textFieldL, constraints);
 
         constraints.gridy++;
         constraints.gridx = 0;
@@ -170,6 +174,7 @@ public class EquationDrake {
     }
 
     private void calculateResult() {
+
         double R = sliderR.getValue() / 100.0;
         double fp = sliderFp.getValue() / 100.0;
         double ne = sliderNe.getValue() / 100.0;
@@ -177,18 +182,33 @@ public class EquationDrake {
         double fi = sliderFi.getValue() / 100.0;
         double fc = sliderFc.getValue() / 100.0;
         double L = sliderL.getValue() / 100.0;
-
         double N = R * fp * ne * fl * fi * fc * L;
 
-        resultFieldR.setText(String.format("%.2f", R));
-        resultFieldFp.setText(String.format("%.2f", fp));
-        resultFieldNe.setText(String.format("%.2f", ne));
-        resultFieldFl.setText(String.format("%.2f", fl));
-        resultFieldFi.setText(String.format("%.2f", fi));
-        resultFieldFc.setText(String.format("%.2f", fc));
-        resultFieldL.setText(String.format("%.2f", L));
-
+        textFieldR.setText(String.format("%.2f", R));
+        textFieldFp.setText(String.format("%.2f", fp));
+        textFieldNe.setText(String.format("%.2f", ne));
+        textFieldFl.setText(String.format("%.2f", fl));
+        textFieldFi.setText(String.format("%.2f", fi));
+        textFieldFc.setText(String.format("%.2f", fc));
+        textFieldL.setText(String.format("%.2f", L));
         resultField.setText(String.format("%.2f", N));
+
+        if (N < 1) {
+            System.out.println("N est inférieur à 1 !");
+            // JOptionPane.showMessageDialog(frame, "N est inférieur à 1, des valeurs vont
+            // être générées pour fl, fi et fc");
+            while (N < 1) {
+                Random rand = new Random();
+                fl = rand.nextDouble();
+                fi = rand.nextDouble();
+                fc = rand.nextDouble();
+                N = R * fl * fi * fc * L;
+                textFieldFl.setText(String.format("%.2f", fl));
+                textFieldFi.setText(String.format("%.2f", fi));
+                textFieldFc.setText(String.format("%.2f", fc));
+                resultField.setText(String.format("%.2f", N));
+            }
+        }
     }
 
     public static void main(String[] args) {
