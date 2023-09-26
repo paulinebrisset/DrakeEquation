@@ -1,9 +1,11 @@
 package tp2;
 
-import javax.swing.*;
-import javax.swing.event.*;
 import java.awt.*;
 import java.util.Random;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
+import javax.swing.event.*;
 
 public class EquationDrake {
     private JFrame frame;
@@ -14,6 +16,9 @@ public class EquationDrake {
     private JSlider sliderR, sliderFp, sliderNe, sliderFl, sliderFi, sliderFc, sliderL;
     private JTextField textFieldR, textFieldFp, textFieldNe, textFieldFl, textFieldFi, textFieldFc, textFieldL,
             resultField;
+    private JButton startButton, stopButton;
+    private SwingWorker<Void, Void> simulationWorker;
+    private Timer timer;
 
     public EquationDrake() {
         frame = new JFrame("Équation de Drake");
@@ -23,8 +28,7 @@ public class EquationDrake {
 
         labelTitle = new JLabel("Équation de Drake");
         labelTitle.setFont(new Font("SansSerif", Font.BOLD, 24));
-        labelFormula = new JLabel(
-                "<html>N = R* * fp * ne * fl * fi * fc * L<br>(N = Nombre de civilisations extraterrestres dans notre galaxie)</html>");
+        labelFormula = new JLabel("N = R* * fp * ne * fl * fi * fc * L");
         labelFormula.setFont(new Font("SansSerif", Font.PLAIN, 16));
 
         labelR = new JLabel("Taux de formation d'étoiles (R*)");
@@ -58,9 +62,12 @@ public class EquationDrake {
         labelResult = new JLabel("Résultat de l'équation :");
         resultField = createResultField(0);
 
+        startButton = new JButton("Start");
+        stopButton = new JButton("Stop");
+
         addComponentsToPanel();
         addListeners();
-        calculateResult(); // Calcul initial lors de la création de l'instance.
+        calculateResult(false); // Calcul initial lors de la création de l'instance.
 
         frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -68,6 +75,7 @@ public class EquationDrake {
         frame.setVisible(true);
     }
 
+    // Interface
     private JSlider createSlider(int min, int max, int initialValue) {
         JSlider slider = new JSlider(JSlider.HORIZONTAL, min, max, initialValue);
         slider.setMajorTickSpacing(10);
@@ -154,13 +162,19 @@ public class EquationDrake {
         panel.add(labelResult, constraints);
         constraints.gridx = 1;
         panel.add(resultField, constraints);
+        constraints.gridy++;
+        constraints.gridx = 0;
+        panel.add(startButton, constraints);
+        constraints.gridx = 1;
+        panel.add(stopButton, constraints);
     }
 
+    // Listeners
     private void addListeners() {
         ChangeListener changeListener = new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                calculateResult();
+                calculateResult(false);
             }
         };
 
@@ -171,17 +185,32 @@ public class EquationDrake {
         sliderFi.addChangeListener(changeListener);
         sliderFc.addChangeListener(changeListener);
         sliderL.addChangeListener(changeListener);
+
+        startButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startSimulation();
+            }
+        });
+
+        stopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                stopSimulation();
+            }
+        });
     }
 
-    private void calculateResult() {
-
+    private void calculateResult(boolean isFromSimulation) {
+        boolean nUnder1 = false;
+        System.out.println("on est dans calculte result");
         double R = sliderR.getValue() / 100.0;
+        double L = sliderL.getValue() / 100.0;
         double fp = sliderFp.getValue() / 100.0;
         double ne = sliderNe.getValue() / 100.0;
         double fl = sliderFl.getValue() / 100.0;
         double fi = sliderFi.getValue() / 100.0;
         double fc = sliderFc.getValue() / 100.0;
-        double L = sliderL.getValue() / 100.0;
         double N = R * fp * ne * fl * fi * fc * L;
 
         textFieldR.setText(String.format("%.2f", R));
@@ -194,21 +223,63 @@ public class EquationDrake {
         resultField.setText(String.format("%.2f", N));
 
         if (N < 1) {
-            System.out.println("N est inférieur à 1 !");
-            // JOptionPane.showMessageDialog(frame, "N est inférieur à 1, des valeurs vont
-            // être générées pour fl, fi et fc");
-            while (N < 1) {
-                Random rand = new Random();
-                fl = rand.nextDouble();
-                fi = rand.nextDouble();
-                fc = rand.nextDouble();
-                N = R * fl * fi * fc * L;
+            nUnder1 = true;
+        }
+        if (N < 1 || isFromSimulation) {
+            do {
+                fl = generateRandomValue();
+                fi = generateRandomValue();
+                fc = generateRandomValue();
+                N = R * fp * ne * fl * fi * fc * L;
                 textFieldFl.setText(String.format("%.2f", fl));
                 textFieldFi.setText(String.format("%.2f", fi));
                 textFieldFc.setText(String.format("%.2f", fc));
                 resultField.setText(String.format("%.2f", N));
-            }
+            } while (N < 1);
         }
+        // Display the JOptionPane message only if nUnder1 is true
+        if (nUnder1) {
+            System.out.println("N était inférieur à 1, des valeurs ont été générées aléatoirement pour fl, fi et fc");
+        }
+    }
+
+    private double generateRandomValue() {
+        return new Random().nextDouble();
+    }
+
+    private void stopSimulation() {
+        if (simulationWorker != null && !simulationWorker.isDone()) {
+            simulationWorker.cancel(true);
+        }
+        if (timer != null && timer.isRunning()) {
+            timer.stop();
+        }
+    }
+
+    private void startSimulation() {
+        // Stop previous simulation if running
+        stopSimulation();
+
+        simulationWorker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                timer = new Timer(1000, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (!isCancelled()) {
+                            SwingUtilities.invokeLater(new Runnable() {
+                                public void run() {
+                                    calculateResult(true);
+                                }
+                            });
+                        }
+                    }
+                });
+                timer.start();
+                return null;
+            }
+        };
+        simulationWorker.execute();
     }
 
     public static void main(String[] args) {
