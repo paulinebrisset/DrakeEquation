@@ -24,7 +24,7 @@ public class EquationDrake {
         labelFormula.setFont(new Font("SansSerif", Font.PLAIN, 16));
 
         labelR = new JLabel("Taux de formation d'étoiles (R*)");
-        sliderR = createSlider(0, 100, 20); // Plage de 0 à 100 avec valeur initiale à 20
+        sliderR = createSlider(100, 10000, 2000); // Plage de 0 à 100 avec valeur initiale à 20
         resultFieldR = createResultField(20);
 
         labelFp = new JLabel("Fraction d'étoiles avec des systèmes planétaires (fp)");
@@ -48,7 +48,7 @@ public class EquationDrake {
         resultFieldFc = createResultField(10);
 
         labelL = new JLabel("Durée de communication (L)");
-        sliderL = createSlider(0, 1000000, 100000); // Plage de 0 à 1 000 000 avec valeur initiale à 100 000
+        sliderL = createSlider(100, 100000, 100000); // Plage de 0 à 1 000 000 avec valeur initiale à 100 000
         resultFieldL = createResultField(100000);
 
         labelResult = new JLabel("Résultat de l'équation :");
@@ -56,6 +56,7 @@ public class EquationDrake {
 
         addComponentsToPanel();
         addListeners();
+        calculateResult(); // Calcul initial lors de la création de l'instance.
 
         frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -155,25 +156,7 @@ public class EquationDrake {
         ChangeListener changeListener = new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                double R = sliderR.getValue() / 100.0;
-                double fp = sliderFp.getValue() / 100.0;
-                double ne = sliderNe.getValue() / 100.0;
-                double fl = sliderFl.getValue() / 100.0;
-                double fi = sliderFi.getValue() / 100.0;
-                double fc = sliderFc.getValue() / 100.0;
-                double L = sliderL.getValue() / 100.0;
-
-                double N = R * fp * ne * fl * fi * fc * L;
-
-                resultFieldR.setText(String.format("%.2f", R));
-                resultFieldFp.setText(String.format("%.2f", fp));
-                resultFieldNe.setText(String.format("%.2f", ne));
-                resultFieldFl.setText(String.format("%.2f", fl));
-                resultFieldFi.setText(String.format("%.2f", fi));
-                resultFieldFc.setText(String.format("%.2f", fc));
-                resultFieldL.setText(String.format("%.2f", L));
-
-                resultField.setText(String.format("%.2f", N));
+                calculateResult();
             }
         };
 
@@ -184,6 +167,28 @@ public class EquationDrake {
         sliderFi.addChangeListener(changeListener);
         sliderFc.addChangeListener(changeListener);
         sliderL.addChangeListener(changeListener);
+    }
+
+    private void calculateResult() {
+        double R = sliderR.getValue() / 100.0;
+        double fp = sliderFp.getValue() / 100.0;
+        double ne = sliderNe.getValue() / 100.0;
+        double fl = sliderFl.getValue() / 100.0;
+        double fi = sliderFi.getValue() / 100.0;
+        double fc = sliderFc.getValue() / 100.0;
+        double L = sliderL.getValue() / 100.0;
+
+        double N = R * fp * ne * fl * fi * fc * L;
+
+        resultFieldR.setText(String.format("%.2f", R));
+        resultFieldFp.setText(String.format("%.2f", fp));
+        resultFieldNe.setText(String.format("%.2f", ne));
+        resultFieldFl.setText(String.format("%.2f", fl));
+        resultFieldFi.setText(String.format("%.2f", fi));
+        resultFieldFc.setText(String.format("%.2f", fc));
+        resultFieldL.setText(String.format("%.2f", L));
+
+        resultField.setText(String.format("%.2f", N));
     }
 
     public static void main(String[] args) {
