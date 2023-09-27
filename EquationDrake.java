@@ -22,7 +22,8 @@ public class EquationDrake {
 
     public EquationDrake() {
         frame = new JFrame("Équation de Drake");
-        frame.setPreferredSize(new Dimension(800, 600)); // Fenêtre plus grande
+
+        frame.setPreferredSize(new Dimension(800, 600));
         panel = new JPanel(new GridBagLayout());
         constraints = new GridBagConstraints();
 
@@ -32,11 +33,11 @@ public class EquationDrake {
         labelFormula.setFont(new Font("SansSerif", Font.PLAIN, 16));
 
         labelR = new JLabel("Taux de formation d'étoiles (R*)");
-        sliderR = createSlider(100, 10000, 2000); // Plage de 0 à 100 avec valeur initiale à 20
+        sliderR = createSlider(100, 10000, 2000);
         textFieldR = createResultField(20);
 
         labelFp = new JLabel("Fraction d'étoiles avec des systèmes planétaires (fp)");
-        sliderFp = createSlider(0, 100, 10); // Plage de 0 à 100 avec valeur initiale à 10
+        sliderFp = createSlider(0, 100, 10);
         textFieldFp = createResultField(10);
 
         labelNe = new JLabel("Nombre moyen de planètes potentiellement habitables (ne)");
@@ -67,7 +68,8 @@ public class EquationDrake {
 
         addComponentsToPanel();
         addListeners();
-        calculateResult(false); // Calcul initial lors de la création de l'instance.
+        // Calcul initial at the instance creation
+        calculateResult(false);
 
         frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -202,8 +204,6 @@ public class EquationDrake {
     }
 
     private void calculateResult(boolean isFromSimulation) {
-        boolean nUnder1 = false;
-        System.out.println("on est dans calculte result");
         double R = sliderR.getValue() / 100.0;
         double L = sliderL.getValue() / 100.0;
         double fp = sliderFp.getValue() / 100.0;
@@ -223,7 +223,7 @@ public class EquationDrake {
         resultField.setText(String.format("%.2f", N));
 
         if (N < 1) {
-            nUnder1 = true;
+            System.out.println("N est inférieur à 1, des valeurs vont être générées aléatoirement pour fl, fi et fc");
         }
         if (N < 1 || isFromSimulation) {
             do {
@@ -236,10 +236,6 @@ public class EquationDrake {
                 textFieldFc.setText(String.format("%.2f", fc));
                 resultField.setText(String.format("%.2f", N));
             } while (N < 1);
-        }
-        // Display the JOptionPane message only if nUnder1 is true
-        if (nUnder1) {
-            System.out.println("N était inférieur à 1, des valeurs ont été générées aléatoirement pour fl, fi et fc");
         }
     }
 
